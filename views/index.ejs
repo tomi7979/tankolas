@@ -1,20 +1,19 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      var socket=io();
-      socket.on('connect',()=>{
-        console.log('Connected');
-      });
-      socket.on('disconnect',()=>{
-        console.log('Disconnected');
-      });    </script>
-  </body>
-</html>
+<% include header.ejs %>
+
+<body>
+	<h1><%= title %></h1>
+	<p>Welcome to <%= title %></p>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var socket=io();
+		socket.on('connect',()=>{
+			console.log('Connected');
+		});
+		socket.on('disconnect',()=>{
+			console.log('Disconnected');
+		});    
+	</script>
+</body>
+
+
+<% include footer.ejs %>

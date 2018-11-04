@@ -40,4 +40,23 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+
+var mysql = require('mysql')
+var connection = mysql.createConnection({
+  host     : '40.117.158.184',
+  user     : 'tomi7979',
+  password : 'Orsika19820628',
+  database : 'nt'
+});
+
+connection.connect();
+
+connection.query('SELECT * FROM nt.fuelUsage;', function (err, rows, fields) {
+  if (err) throw err
+
+  console.log('The solution is: ', rows);
+});
+
+connection.end();
+
 module.exports = app;
