@@ -1,0 +1,24 @@
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket=io();
+	socket.on('connect',()=>{
+		console.log('Connected');
+	});
+	socket.on('disconnect',()=>{
+		console.log('Disconnected');
+	});    
+	
+	document.getElementById("btnFuelingSave").onclick=function(){
+		var data={
+			_date		:document.getElementById("inpDate").value,
+			_quantity	:document.getElementById("inpQuantity").value,
+			_drivenKm	:document.getElementById("inpDrivenKm").value,
+			_totalPrice	:document.getElementById("inpTotalPrice").value,
+			_place		:document.getElementById("inpPlace").value
+		};
+		if (confirm("Jók az adatok?")) {
+			socket.emit('fueling',data);
+		}		
+	};
+
+</script>
