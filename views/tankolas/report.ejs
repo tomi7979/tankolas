@@ -1,0 +1,19 @@
+<% include ../header.ejs %>
+<% include menu.ejs %>
+
+<body>
+
+	<h1><%= title %></h1>
+	<div class="col-4">
+		<table id="tableReport">
+			<thead></thead>
+			<tbody></tbody>
+			<tfoot></tfoot>
+		</table>
+	</div>
+</body>
+<script>
+	var period='<%= period %>'
+</script>
+<% include ../../public/javascripts/tankolas/report.html %>
+<% include ../footer.ejs %>

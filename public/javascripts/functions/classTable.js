@@ -131,6 +131,9 @@ class _Table {
 				case 'hidden':
 					td.innerHTML = `<input type='hidden' class='${class_}' id='${id}' value='${value}'>`;
 					break;
+				default:
+					td.innerHTML = `${value}`;
+					break;
 			}
 			// Esemény hozzáadása a cella eleméhez
 			for (const event in c.event) {

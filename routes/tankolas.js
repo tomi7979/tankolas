@@ -1,22 +1,21 @@
 var express = require('express');
 var router = express.Router();
-var socket=require('../socket.js');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-	res.render('tankolas/tankolas', { title: 'Tankolas' });
+	res.render('tankolas/fuelingMain', { title: 'Tankolas' });
 });
 router.get('/fueling', function(req, res, next) {
 	res.render('tankolas/fueling', { title: 'Tankolás rögzítése' });
 });
-router.get('/napi', function(req, res, next) {
-	res.render('tankolas/napi', { title: 'Napi fogyasztás' });
+router.get('/daily', function(req, res, next) {
+	res.render('tankolas/report', { title: 'Napi fogyasztás', period:'daily' });
 });
-router.get('/heti', function(req, res, next) {
-	res.render('tankolas/heti', { title: 'Heti fogyasztés' });
+router.get('/weekly', function(req, res, next) {
+	res.render('tankolas/report', { title: 'Heti fogyasztés', period:'weekly' });
 });
-router.get('/havi', function(req, res, next) {
-	res.render('tankolas/havi', { title: 'Havi fogyasztás' });
+router.get('/monthly', function(req, res, next) {
+	res.render('tankolas/report', { title: 'Havi fogyasztás', period:'monthly' });
 });
 
 module.exports = router;

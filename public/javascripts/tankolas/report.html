@@ -1,0 +1,127 @@
+
+<script src="/javascripts/functions/functions.js"></script>
+<script src="/javascripts/functions/classTable.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket=io();
+	t=new _Table('tableReport');
+
+	socket.on('connect',()=>{
+		console.log('Connected from ' + period);
+	});
+	socket.on('disconnect',()=>{
+		console.log('Disconnected from ' + period);
+	}); 
+	socket.emit('getFuelUsage',period);
+	socket.on('resFuelUsage',(data)=>{
+		console.log(data);
+		switch (period) {
+			case 'daily':
+				var tableData={
+				name:'tableReport',
+				data:data[0],
+				columns:[
+					[{	head:   'Év',
+						field:  'Year',
+						style:  'width:150px;',
+						order:  true
+					}],
+					[{	head:   'Hónap',
+						field:  'Month',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Nap',
+						field:  'Day',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Km',
+						field:  'DrivenKm',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Mennyiség',
+						field:  'UsedFuel',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Fogyasztás',
+						field:  'UsedFuel100Km',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Ár',
+						field:  'Price',
+						style:  'width:40px;'
+					}]
+					]			
+				};
+			
+			break;
+			case 'weekly':
+				var tableData={
+					name:'tableReport',
+					data:data[0],
+					columns:[
+						[{	head:   'Év',
+							field:  'Year',
+							style:  'width:150px;',
+							order:  true
+						}],
+						[{	head:   'Hét',
+							field:  'Week',
+							style:  'width:40px;'
+						}],
+						[{	head:   'Km',
+							field:  'DrivenKm',
+							style:  'width:40px;'
+						}],
+						[{	head:   'Mennyiség',
+							field:  'UsedFuel',
+							style:  'width:40px;'
+						}],
+						[{	head:   'Fogyasztás',
+							field:  'UsedFuel100Km',
+							style:  'width:40px;'
+						}],
+						[{	head:   'Ár',
+							field:  'Price',
+							style:  'width:40px;'
+						}]
+						]			
+					};
+			break;
+			case 'monthly':
+				var tableData={
+				name:'tableReport',
+				data:data[0],
+				columns:[
+					[{	head:   'Év',
+						field:  'Year',
+						style:  'width:150px;',
+						order:  true
+					}],
+					[{	head:   'Hónap',
+						field:  'Month',
+						style:  'width:40px;'
+					}],
+
+					[{	head:   'Km',
+						field:  'DrivenKm',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Mennyiség',
+						field:  'UsedFuel',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Fogyasztás',
+						field:  'UsedFuel100Km',
+						style:  'width:40px;'
+					}],
+					[{	head:   'Ár',
+						field:  'Price',
+						style:  'width:40px;'
+					}]
+					]			
+				};
+			break;
+		}
+		t.create(tableData);		
+	});
+</script>

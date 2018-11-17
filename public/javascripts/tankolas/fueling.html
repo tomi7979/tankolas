@@ -7,7 +7,13 @@
 	socket.on('disconnect',()=>{
 		console.log('Disconnected');
 	});    
-	
+	socket.on('resFueling',function(data){
+		console.log(data);
+	});
+	socket.on('resFuelUsageDaily',function(data){
+		console.log(data);
+	});
+	socket.emit('getFuelUsageDaily');
 	document.getElementById("btnFuelingSave").onclick=function(){
 		var data={
 			_date		:document.getElementById("inpDate").value,
