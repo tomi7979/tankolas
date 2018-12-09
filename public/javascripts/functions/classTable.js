@@ -1,3 +1,38 @@
+/* 
+Paraméter objektum felépítése:
+	name:		Tábla neve
+	data:		Adatok json formátumban
+	editable:	Alapértelmezetten false, azt jelenti, hogy a táblázat értékei módosíthatóak-e
+		true:		Módosíthatóak az értékek
+	editBy:		Szerkesztés kezdeményezése
+		rowClick:	Sorra kattintással
+		iconClick:	Az első oszlopban toll ikon
+	columns:	Oszlopok paraméterezése tömbben
+		head:		Oszlop neve megjelenítve
+		field:		Oszlop neve a data-ban
+		type:		Oszlop típusa
+			text		Szöveg	input type=text
+			button		Gomb	input type=button
+			hidden		Rejett	input type=hidden
+			Nincs megadva	Csak szöveg
+		style:		Oszlop egyedi stílusa
+		order:		Rendezés
+			true		Rendezés bekapcsolása
+		filter:		Szűrő
+			"select"	Lenyíló lista
+		event:		Esemény az oszlop összes cellájára 
+			{
+				onclick: 		someFunction
+				onmouseover:  	function(){console.log('elemover')}
+			}
+		label:		Gomb felirat
+	rowEvents:	Minden sorra rákerül az itt megadott esemény
+	deleteRow:	A sor előtt megjelentik egy törlés gomb
+		true:
+
+*/
+
+
 class _Table {
 	constructor(elementId){
 		this.originalData={};
@@ -11,15 +46,12 @@ class _Table {
 		let tbody=table.tBodies[0];
 		let tfoot=table.tFoot;
 
-		// thead.className="thead-dark";
-	
-
 		tfoot.innerHTML=`<input type='hidden' id='data_${obj.name}' value='${(stringToBase64(JSON.stringify(obj)))}'>`;
 		
 		// Fejléc összeállítása
 		obj.columns.forEach(column => {
-			let c=column[0];
-			let th=document.createElement('th');
+			let c	=column[0];
+			let th	=document.createElement('th');
 			let span=document.createElement('span');
 			span.innerHTML=(c.hasOwnProperty('head'))?c.head:'';
 
@@ -32,15 +64,15 @@ class _Table {
 					span['onclick']=function(){
 						let className=this.id.replace('span','class');
 						let e=document.getElementById(elementId).tBodies[0];
-						console.log(c);
+						// console.log(c);
 						for(let i=e.rows.length-1;0<i;i--){
 							for(let j=0;j<i;j++){
 								if (c.order=="desc"){
-									if(e.rows[j].getElementsByClassName(className)[0].value.toUpperCase()<e.rows[j+1].getElementsByClassName(className)[0].value.toUpperCase()){
+									if(e.rows[j].getElementsByClassName(className)[0].innerText/* .toUpperCase() */<e.rows[j+1].getElementsByClassName(className)[0].innerText/* .toUpperCase() */){
 										e.insertBefore(e.rows[j+1],e.rows[j]);
 									}
 								} else {
-									if(e.rows[j].getElementsByClassName(className)[0].value.toUpperCase()>e.rows[j+1].getElementsByClassName(className)[0].value.toUpperCase()){
+									if(e.rows[j].getElementsByClassName(className)[0].innerText/* .toUpperCase() */>e.rows[j+1].getElementsByClassName(className)[0].innerText/* .toUpperCase() */){
 										e.insertBefore(e.rows[j+1],e.rows[j]);
 									}
 								}
@@ -60,7 +92,7 @@ class _Table {
 						let select= `<br><select id='head_${obj.name}_${c.field}'><option></option>`
 						let values=[];
 						obj.data.forEach(row=>{
-							if(values.filter(v=>v==row[c.field]).length==0){
+							if(values.filter(v=>v.toString().toLowerCase()==row[c.field].toString().toLowerCase()).length==0){
 								values.push(row[c.field].toString().toLowerCase());
 							}
 						});
@@ -78,7 +110,7 @@ class _Table {
 
 		// Adatok betöltése sorokba
 		obj.data.forEach(row => {
-			let uniqueRowId=this.addRow({table:obj.name,position:0,data:row});
+			let uniqueRowId=this.addRow({table:obj.name,position:0,data:row,editable:obj.editable});
 			row['uniqueRowId']=uniqueRowId;
 		});
 		this.originalData=obj;
@@ -91,15 +123,42 @@ class _Table {
 					let className=`class_${obj.name}_${c.field}`;
 					Array.from(document.getElementsByClassName(className)).forEach(e=>{
 						e.parentElement.parentElement.style.display=
-							(e.value==((this.selectedIndex==0)?e.value:this.value))
+							(e.innerText.toLowerCase()==((this.selectedIndex==0)?e.innerText.toLowerCase():this.value))
 								?'table-row'
 								:'none';
 					});
 				};
 			};
 		});
+
+		// Ha a táblázat szerkeszthető, akkor esemény hozzáadása
+		if(obj.hasOwnProperty('editable')){
+			table.tHead.insertBefore(document.createElement('th'),table.tHead.childNodes[0]);
+			Array.from(table.rows).forEach(e => {
+				let td=document.createElement('td');
+				td.innerHTML='<i class="fas fa-edit"></i>';	
+				td.firstChild.onclick=function(){
+					let row=this.parentElement.parentElement;
+					// row.
+
+				};
+				e.insertBefore(td,e.childNodes[0]);
+			});
+			// tr.onclick=function(){console.log('Szerkeszt esemény');}
+		};
 		
-	}
+		// Sor törlés esemény hozzáadása
+		if(obj.hasOwnProperty('deleteRow')){
+			table.tHead.insertBefore(document.createElement('th'),table.tHead.childNodes[0]);
+			Array.from(table.rows).forEach(e => {
+				let td=document.createElement('td');
+				td.innerHTML='<i class="far fa-trash-alt"></i>';	
+				td.firstChild.onclick=function(){console.log('DeleteRow')};
+				e.insertBefore(td,e.childNodes[0]);
+			});
+		};
+	};
+	
 	addRow(obj){
 		var position=obj.position
 		var data=obj.data
@@ -132,8 +191,11 @@ class _Table {
 					td.innerHTML = `<input type='hidden' class='${class_}' id='${id}' value='${value}'>`;
 					break;
 				default:
-					td.innerHTML = `${value}`;
+					// td.innerHTML = `<span class='${class_}' value='${value}'>${value}</span>`;
 					break;
+			}
+			if (obj.editable){
+				td.innerHTML += `<span class='${class_}' value='${value}' style='display:none'>${value}</span>`;
 			}
 			// Esemény hozzáadása a cella eleméhez
 			for (const event in c.event) {

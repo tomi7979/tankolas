@@ -1,30 +1,66 @@
+<script src="/javascripts/functions/functions.js"></script>
+<script src="/javascripts/functions/classTable.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+
 <script>
 	var socket=io();
-	socket.on('connect',()=>{
-		console.log('Connected');
-	});
-	socket.on('disconnect',()=>{
-		console.log('Disconnected');
-	});    
+	t=new _Table('tableFueling');
+	socket.emit('getFueling');
 	socket.on('resFueling',function(data){
 		console.log(data);
-	});
-	socket.on('resFuelUsageDaily',function(data){
-		console.log(data);
-	});
-	socket.emit('getFuelUsageDaily');
-	document.getElementById("btnFuelingSave").onclick=function(){
-		var data={
-			_date		:document.getElementById("inpDate").value,
-			_quantity	:document.getElementById("inpQuantity").value,
-			_drivenKm	:document.getElementById("inpDrivenKm").value,
-			_totalPrice	:document.getElementById("inpTotalPrice").value,
-			_place		:document.getElementById("inpPlace").value
+		let tableData={
+			name:'tableFueling',
+			editasble:true,
+			deleteRow:true,
+			// rowEvents:{
+			// 	onclick:function(){console.log('rowEvent');}
+			// },
+			data:data,
+			columns:[
+				[{
+					head:	'Dátum',
+					field:	'Date',
+					type:	'text'
+				}],
+				[{
+					head:	'Hely',
+					field:	'Place',
+					filter:	'select',
+					type:	'text'
+				}],
+				[{
+					head:	'Fizetett összeg',
+					field:	'TotalPrice',
+					filter:	'select',
+					type:	'text'
+				}],
+				[{
+					head:	'Mennyiség',
+					field:	'Quantity',
+					type:	'text'
+				}],
+				[{
+					head:	'Vezetett km',
+					field:	'DrivenKm',
+					order:	true,
+					type:	'text'
+				}]
+			]
 		};
-		if (confirm("Jók az adatok?")) {
-			socket.emit('fueling',data);
-		}		
-	};
+		t.create(tableData);
+	});
+
+	// document.getElementById("btnFuelingSave").onclick=function(){
+	// 	var data={
+	// 		_date		:document.getElementById("inpDate").value,
+	// 		_quantity	:document.getElementById("inpQuantity").value,
+	// 		_drivenKm	:document.getElementById("inpDrivenKm").value,
+	// 		_totalPrice	:document.getElementById("inpTotalPrice").value,
+	// 		_place		:document.getElementById("inpPlace").value
+	// 	};
+	// 	if (confirm("Jók az adatok?")) {
+	// 		socket.emit('fueling',data);
+	// 	}		
+	// };
 
 </script>
