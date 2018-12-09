@@ -1,5 +1,5 @@
 /* 
-Paraméter objektum felépítése:
+Paraméter objektum felépítése: 
 	name:		Tábla neve
 	data:		Adatok json formátumban
 	editable:	Alapértelmezetten false, azt jelenti, hogy a táblázat értékei módosíthatóak-e
