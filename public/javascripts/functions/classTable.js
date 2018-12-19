@@ -35,25 +35,31 @@ Paraméter objektum felépítése:
 
 class _Table {
 	constructor(elementId){
-		this.originalData={};
-		this.elementId=elementId;
+		this.originalData	={};
+		this.elementId		=elementId;
 	}
 	create(obj){
-		this.originalData=obj;
-		let table=document.getElementById(obj.name);
-		table.className="table table-sm table-hover";
-		let thead=table.tHead;
-		let tbody=table.tBodies[0];
-		let tfoot=table.tFoot;
+		this.originalData	=obj;
+		obj.underEditing	=false;
+		let table			=document.getElementById(obj.name);
+		table.className		="table table-sm table-hover";
+		let thead			=table.tHead;
+		let tbody			=table.tBodies[0];
+		let tfoot			=table.tFoot;
 
 		tfoot.innerHTML=`<input type='hidden' id='data_${obj.name}' value='${(stringToBase64(JSON.stringify(obj)))}'>`;
 		
+		// className beállítása az oszlopokhoz
+		obj.columns.forEach(column => {
+			column.className=`class_${obj.name}_${column.field}`;
+		});
+
 		// Fejléc összeállítása
 		obj.columns.forEach(column => {
-			let c	=column[0];
-			let th	=document.createElement('th');
-			let span=document.createElement('span');
-			span.innerHTML=(c.hasOwnProperty('head'))?c.head:'';
+			let c			=column;
+			let th			=document.createElement('th');
+			let span		=document.createElement('span');
+			span.innerHTML	=(c.hasOwnProperty('head'))?c.head:'';
 
 			//Rendezés
 			if(c.hasOwnProperty('order')){
@@ -117,11 +123,9 @@ class _Table {
 
 		// Esemény beállítása a Szűrőhöz
 		obj.columns.forEach(column => {
-			let c=column[0];
-			if (c.hasOwnProperty('filter')){
-				document.getElementById(`head_${obj.name}_${c.field}`).onchange=function(){
-					let className=`class_${obj.name}_${c.field}`;
-					Array.from(document.getElementsByClassName(className)).forEach(e=>{
+			if (column.hasOwnProperty('filter')){
+				document.getElementById(`head_${obj.name}_${column.field}`).onchange=function(){
+					Array.from(document.getElementsByClassName(column.className)).forEach(e=>{
 						e.parentElement.parentElement.style.display=
 							(e.innerText.toLowerCase()==((this.selectedIndex==0)?e.innerText.toLowerCase():this.value))
 								?'table-row'
@@ -133,14 +137,87 @@ class _Table {
 
 		// Ha a táblázat szerkeszthető, akkor esemény hozzáadása
 		if(obj.hasOwnProperty('editable')){
-			table.tHead.insertBefore(document.createElement('th'),table.tHead.childNodes[0]);
+			let th=document.createElement('th');
+			table.tHead.insertBefore(th,table.tHead.childNodes[0]);
 			Array.from(table.rows).forEach(e => {
 				let td=document.createElement('td');
-				td.innerHTML='<i class="fas fa-edit"></i>';	
-				td.firstChild.onclick=function(){
-					let row=this.parentElement.parentElement;
-					// row.
+				td.innerHTML='<i class="fas fa-edit"></i>';								//Edit gomb létrehozása
+				// td.style.width='50px';
+				td.firstChild.onclick=function(){										//Edit gomb Click esemény
+					if (obj.underEditing)
+						{alert("Szerkesztés alatt van a táblázat")}
+					else {
+						obj.underEditing=true;
+						obj.columns.forEach(column => {
+							let row=this.parentElement.parentElement;
+							let td=row.getElementsByClassName(column.className)[0].parentElement;
+							let span=td.firstChild;
+							switch (column.type){
+								case 'text':
+									let tdStyle	=window.getComputedStyle(td);
+									let width	=parseFloat(tdStyle.width)-parseFloat(tdStyle.paddingLeft)-parseFloat(tdStyle.paddingRight);
+									let height	=parseFloat(tdStyle.height)-parseFloat(tdStyle.paddingTop)-parseFloat(tdStyle.paddingBottom);
+									let style	=`width:${width}px;height:${height}px`;
+									span.style.display='none';
+									td.innerHTML += `<input type='text' value='${span.attributes["value"].value}' style='${style}'>`;
+									break;
+								case 'id':
+									break;
+							}
+						});
 
+
+						//Törlés gomb elrejtése és az OK gomb megjelenítése
+						let row		=this.parentElement.parentElement;
+						row.childNodes[0].firstChild.style.display='none';
+						let i		=document.createElement('i');
+						i.className	='far fa-check-circle';
+						i.style		='color:green';
+						row.childNodes[0].appendChild(i);
+						//Esemény az OK gombhoz
+						row.childNodes[0].childNodes[1].onclick=function(){
+							let row=this.parentElement.parentElement;
+							obj.columns.forEach(column => {						
+								switch (column.type){
+									case 'text':
+										let td=row.getElementsByClassName(column.className)[0].parentElement;
+										let span=td.firstChild;
+										span.attributes["value"].value=td.childNodes[1].value;		//Módosított érték visszaírása a spanba
+										span.innerText=span.attributes["value"].value;
+										td.removeChild(td.childNodes[1]);							//Input eltávolítása
+										td.firstChild.style.display='inline';						//Span megjelenítése
+										break;
+								};
+							});
+							row.childNodes[0].firstChild.style.display='inline';			//Delete gomb megjelenítése
+							row.childNodes[1].firstChild.style.display='inline';			//Edit gomb megjelenítése
+							row.childNodes[0].removeChild(row.childNodes[0].childNodes[1]);	//OK gomb törlése
+							row.childNodes[1].removeChild(row.childNodes[1].childNodes[1]);	//Mégsem gomb törlése
+							obj.underEditing=false;
+						};
+						//Szerkeszt gomb elrejtése és az Mégsem gomb megjelenítése
+						row.childNodes[1].firstChild.style.display='none';
+						i			=document.createElement('i');
+						i.className	='fas fa-ban';
+						i.style		='color:red';
+						row.childNodes[1].appendChild(i);
+						//Esemény a Mégsem gombhoz
+						row.childNodes[1].childNodes[1].onclick=function(){
+							let row=this.parentElement.parentElement;
+							obj.columns.forEach(column => {						
+								if (column.type!='id'){
+									let td=row.getElementsByClassName(column.className)[0].parentElement;
+									td.removeChild(td.childNodes[1]);							//Input eltávolítása
+									td.firstChild.style.display='inline';						//Span megjelenítése
+								};
+							});
+							row.childNodes[0].firstChild.style.display='inline';			//Delete gomb megjelenítése
+							row.childNodes[1].firstChild.style.display='inline';			//Edit gomb megjelenítése
+							row.childNodes[0].removeChild(row.childNodes[0].childNodes[1]);	//OK gomb törlése
+							row.childNodes[1].removeChild(row.childNodes[1].childNodes[1]);	//Mégsem gomb törlése
+							obj.underEditing=false;
+						};
+					};
 				};
 				e.insertBefore(td,e.childNodes[0]);
 			});
@@ -149,16 +226,20 @@ class _Table {
 		
 		// Sor törlés esemény hozzáadása
 		if(obj.hasOwnProperty('deleteRow')){
-			table.tHead.insertBefore(document.createElement('th'),table.tHead.childNodes[0]);
+			let th=document.createElement('th');
+			table.tHead.insertBefore(th,table.tHead.childNodes[0]);
 			Array.from(table.rows).forEach(e => {
 				let td=document.createElement('td');
+				// td.style.width='50px';
 				td.innerHTML='<i class="far fa-trash-alt"></i>';	
-				td.firstChild.onclick=function(){console.log('DeleteRow')};
+				td.firstChild.onclick=function(){
+					let row=this.parentElement.parentElement;
+					row.parentElement.removeChild(row);
+				};
 				e.insertBefore(td,e.childNodes[0]);
 			});
 		};
 	};
-	
 	addRow(obj){
 		var position=obj.position
 		var data=obj.data
@@ -172,7 +253,7 @@ class _Table {
 		var tr = document.createElement('tr');
 		tr.innerHTML="";
 		columns.forEach(column => {
-			var c=column[0];
+			var c=column;
 			var td=document.createElement('td');
 			var value=(data.hasOwnProperty(c.field)) ? data[c.field] : '';
 			var style=(c.style) ? c.style : '';
@@ -181,22 +262,22 @@ class _Table {
 			var class_=`class_${this.elementId}_${c.field}`;
 
 			switch (c.type) {
-				case 'text':
-					td.innerHTML = `<input type='text' class='${class_}' value='${value}' style='${style}'>`;
-					break;
-				case 'button':
-					td.innerHTML = `<input type='button' class='${class_}' value='${label}' style='${style}'>`;
-					break;
-				case 'hidden':
-					td.innerHTML = `<input type='hidden' class='${class_}' id='${id}' value='${value}'>`;
-					break;
+				// case 'text':
+				// 	td.innerHTML = `<input type='text' class='${class_}' value='${value}' style='${style}'>`;
+				// 	break;
+				// case 'button':
+				// 	td.innerHTML = `<input type='button' class='${class_}' value='${label}' style='${style}'>`;
+				// 	break;
+				// case 'hidden':
+				// 	td.innerHTML = `<input type='hidden' class='${class_}' id='${id}' value='${value}'>`;
+				// 	break;
 				default:
-					// td.innerHTML = `<span class='${class_}' value='${value}'>${value}</span>`;
+					td.innerHTML = `<span class='${class_}' value='${value}'>${value}</span>`;
 					break;
 			}
-			if (obj.editable){
-				td.innerHTML += `<span class='${class_}' value='${value}' style='display:none'>${value}</span>`;
-			}
+			// if (obj.editable){
+			// 	td.innerHTML += `<span class='${class_}' value='${value}' style='display:none'>${value}</span>`;
+			// }
 			// Esemény hozzáadása a cella eleméhez
 			for (const event in c.event) {
 				td.firstChild[event] = c.event[event];
@@ -222,29 +303,30 @@ class _Table {
 	getData(){
 		var table=document.getElementById(this.elementId);
 		var tbody=table.tBodies[0];
-		// var originalData = JSON.parse(stringFromBase64(table.tFoot.firstChild.value));
 		var originalData = this.originalData;
-		// console.log(originalData);
 		var columns = originalData.columns;
 		var data=[];
 
 		for (let i = 0; i < tbody.rows.length; i++) {
-			const row = tbody.rows[i];
+			let row = tbody.rows[i];
 			let rowData={};
-			for (let j = 0; j < row.cells.length; j++){
-				const cell = row.cells[j];
-				var column = columns[j][0];
-				switch (column.type) {
-					case 'text':
-						rowData[column.field]=cell.firstChild.value
-						break;
-					case 'button':
-						break;
-					case 'hidden':
-						rowData[column.field]=cell.firstChild.value
-						break;
-				}
-			}
+			columns.forEach(column => {
+				let className=`class_${this.originalData.name}_${column.field}`;
+				Array.from(row.getElementsByClassName(className)).forEach(e=>{
+					switch (column.type) {
+						// case 'text':
+						// 	rowData[column.field]=cell.firstChild.value
+						// 	break;
+						// case 'button':
+						// 	break;
+						// case 'hidden':
+						// 	rowData[column.field]=cell.firstChild.value
+						// 	break;
+						default:
+						rowData[column.field]=e.attributes["value"].value
+					}
+				})
+			});
 			rowData['uniqueRowId']=row.id;
 			data.push(rowData);
 		}

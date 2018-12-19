@@ -10,41 +10,46 @@
 		console.log(data);
 		let tableData={
 			name:'tableFueling',
-			editasble:true,
+			editable:true,
 			deleteRow:true,
 			// rowEvents:{
 			// 	onclick:function(){console.log('rowEvent');}
 			// },
 			data:data,
 			columns:[
-				[{
+				{
 					head:	'Dátum',
 					field:	'Date',
 					type:	'text'
-				}],
-				[{
+				},
+				{
 					head:	'Hely',
 					field:	'Place',
 					filter:	'select',
 					type:	'text'
-				}],
-				[{
+				},
+				{
 					head:	'Fizetett összeg',
 					field:	'TotalPrice',
 					filter:	'select',
 					type:	'text'
-				}],
-				[{
+				},
+				{
 					head:	'Mennyiség',
 					field:	'Quantity',
 					type:	'text'
-				}],
-				[{
+				},
+				{
 					head:	'Vezetett km',
 					field:	'DrivenKm',
 					order:	true,
 					type:	'text'
-				}]
+				},
+				{
+					head:	'ID',
+					field:	'ID_Fueling',
+					type:	'id'
+				}
 			]
 		};
 		t.create(tableData);
@@ -62,5 +67,10 @@
 	// 		socket.emit('fueling',data);
 	// 	}		
 	// };
-
+	document.getElementById('btn_getData').onclick=function(){
+		console.log(t.getData());
+	};
+	document.getElementById('btn_getChanges').onclick=function(){
+		console.log(t.getChanges());
+	};
 </script>

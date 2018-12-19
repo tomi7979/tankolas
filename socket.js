@@ -11,7 +11,8 @@ module.exports = function(io){
 		socket.on('getFueling',function(){
 			let sql="CALL nt.p_getFueling;"
 			pool.query(sql, function (err, rows, fields) {
-				if (err) throw err
+				// if (err) throw err
+				if (err) console.log(err);
 				socket.emit('resFueling',rows[0]);						
 			});
 		});
