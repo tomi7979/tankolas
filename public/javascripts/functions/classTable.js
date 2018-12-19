@@ -28,7 +28,7 @@ Paraméter objektum felépítése:
 		label:		Gomb felirat
 	rowEvents:	Minden sorra rákerül az itt megadott esemény
 	deleteRow:	A sor előtt megjelentik egy törlés gomb
-		true:
+		true: 
 
 */
 
