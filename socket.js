@@ -11,8 +11,8 @@ module.exports = function(io){
 		socket.on('getFueling',function(){
 			let sql="CALL nt.p_getFueling;"
 			pool.query(sql, function (err, rows, fields) {
+				if (err) console.log(err)
 				// if (err) throw err
-				if (err) console.log(err);
 				socket.emit('resFueling',rows[0]);						
 			});
 		});
@@ -20,7 +20,8 @@ module.exports = function(io){
 			console.log(data);
 			let sql="CALL nt.p_insertFueling ('" + data._date + "'," + data._quantity + ",null," + data._drivenKm + "," + data._totalPrice + ",'" + data._place + "');";
 			pool.query(sql, function (err, rows, fields) {
-				if (err) throw err
+				if (err) console.log(err)
+				// if (err) throw err
 				socket.emit('resFuelUsageDaily',rows);						
 			});
 			
@@ -32,7 +33,8 @@ module.exports = function(io){
 			console.log(period)
 			let sql="CALL nt.p_getFuelUsage('" + period + "');";
 			pool.query(sql, function (err, rows, fields) {
-				if (err) throw err
+				if (err) console.log(err)
+				// if (err) throw err
 				socket.emit('resFuelUsage',rows);						
 			});
 		});

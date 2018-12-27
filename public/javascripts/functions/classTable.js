@@ -95,7 +95,7 @@ class _Table {
 				switch (c.filter){
 					case 'select':
 						let div=document.createElement('div');
-						let select= `<br><select id='head_${obj.name}_${c.field}'><option></option>`
+						let select= `<select id='head_${obj.name}_${c.field}'><option></option>`
 						let values=[];
 						obj.data.forEach(row=>{
 							if(values.filter(v=>v.toString().toLowerCase()==row[c.field].toString().toLowerCase()).length==0){
@@ -116,7 +116,7 @@ class _Table {
 
 		// Adatok betöltése sorokba
 		obj.data.forEach(row => {
-			let uniqueRowId=this.addRow({table:obj.name,position:0,data:row,editable:obj.editable});
+			let uniqueRowId=this.addRow({table:obj.name,position:0,data:row,editable:obj.editable,c:obj.columns});
 			row['uniqueRowId']=uniqueRowId;
 		});
 		this.originalData=obj;
@@ -135,7 +135,12 @@ class _Table {
 			};
 		});
 
-		// Ha a táblázat szerkeszthető, akkor esemény hozzáadása
+		// // Ha a táblázat szerkeszthető, akkor esemény hozzáadása
+		if(obj.hasOwnProperty('editable')){
+			let th=document.createElement('th');
+			thead.insertBefore(th,thead.childNodes[0]);
+		};
+		// // Ha a táblázat szerkeszthető, akkor esemény hozzáadása
 		if(obj.hasOwnProperty('editable')){
 			let th=document.createElement('th');
 			table.tHead.insertBefore(th,table.tHead.childNodes[0]);
@@ -240,28 +245,29 @@ class _Table {
 			});
 		};
 	};
+	addEmptyRow(position){
+		console.log(this);
+	};
 	addRow(obj){
-		var position=obj.position
-		var data=obj.data
 		// Egy új sort szúr be a megadott táblába
 		// position (0: végére; x: adott sor elé;)
-
-		var table=document.getElementById(this.elementId);
-		var tbody=table.tBodies[0];
-		var originalData = this.originalData;
-		var columns = originalData.columns;
-		var tr = document.createElement('tr');
+		var position	=obj.position;
+		var data		=obj.data;
+		var table		=document.getElementById(this.elementId);
+		var tbody		=table.tBodies[0];
+		var originalData=this.originalData;
+		var columns 	=originalData.columns;
+		var tr 			=document.createElement('tr');
 		tr.innerHTML="";
 		columns.forEach(column => {
-			var c=column;
-			var td=document.createElement('td');
-			var value=(data.hasOwnProperty(c.field)) ? data[c.field] : '';
-			var style=(c.style) ? c.style : '';
-			var id=(c.id) ? c.id : '';
-			var label=(c.label) ? c.label : '';
-			var class_=`class_${this.elementId}_${c.field}`;
+			var td		=document.createElement('td');
+			var value	=(data.hasOwnProperty(column.field)) ? data[column.field] : '';
+			var style	=(column.style) ? column.style : '';
+			var id		=(column.id) ? column.id : '';
+			var label	=(column.label) ? column.label : '';
+			var class_	=`class_${this.elementId}_${column.field}`;
 
-			switch (c.type) {
+			switch (column.type) {
 				// case 'text':
 				// 	td.innerHTML = `<input type='text' class='${class_}' value='${value}' style='${style}'>`;
 				// 	break;
@@ -275,11 +281,8 @@ class _Table {
 					td.innerHTML = `<span class='${class_}' value='${value}'>${value}</span>`;
 					break;
 			}
-			// if (obj.editable){
-			// 	td.innerHTML += `<span class='${class_}' value='${value}' style='display:none'>${value}</span>`;
-			// }
 			// Esemény hozzáadása a cella eleméhez
-			for (const event in c.event) {
+			for (const event in column.event) {
 				td.firstChild[event] = c.event[event];
 			};
 			tr.appendChild(td);
@@ -291,6 +294,96 @@ class _Table {
 		});
 		var uniqueRowId = 'id-' + Math.random().toString(36).substr(2, 16);
 		tr.id = `${uniqueRowId}`;   
+
+		// // Ha a táblázat szerkeszthető, akkor esemény hozzáadása
+		// if(obj.hasOwnProperty('editable')){
+		// 	let td=document.createElement('td');
+		// 	td.innerHTML='<i class="fas fa-edit"></i>';								//Edit gomb létrehozása
+		// 	// td.style.width='50px';
+		// 	td.firstChild.onclick=addEditButton(this,tr);
+		// 	// td.firstChild.onclick=function(this){
+		// 	// 	console.log(s)
+		// 	// };
+			
+		// 	function addEditButton (obj,row){										//Edit gomb Click esemény
+		// 		if (obj.underEditing)
+		// 			{alert("Szerkesztés alatt van a táblázat")}
+		// 		else {
+		// 			obj.underEditing=true;
+		// 			obj.originalData.columns.forEach(column => {
+		// 				// let row=this.parentElement.parentElement;
+		// 				let td=row.getElementsByClassName(column.className)[0].parentElement;
+		// 				let span=td.firstChild;
+		// 				switch (column.type){
+		// 					case 'text':
+		// 						let tdStyle	=window.getComputedStyle(td);
+		// 						let width	=parseFloat(tdStyle.width)-parseFloat(tdStyle.paddingLeft)-parseFloat(tdStyle.paddingRight);
+		// 						let height	=parseFloat(tdStyle.height)-parseFloat(tdStyle.paddingTop)-parseFloat(tdStyle.paddingBottom);
+		// 						let style	=`width:${width}px;height:${height}px`;
+		// 						span.style.display='none';
+		// 						td.innerHTML += `<input type='text' value='${span.attributes["value"].value}' style='${style}'>`;
+		// 						break;
+		// 					case 'id':
+		// 						break;
+		// 				}
+		// 			});
+
+
+		// 			//Törlés gomb elrejtése és az OK gomb megjelenítése
+		// 			// let row		=this.parentElement.parentElement;
+		// 			row.childNodes[0].firstChild.style.display='none';
+		// 			let i		=document.createElement('i');
+		// 			i.className	='far fa-check-circle';
+		// 			i.style		='color:green';
+		// 			row.childNodes[0].appendChild(i);
+		// 			//Esemény az OK gombhoz
+		// 			row.childNodes[0].childNodes[1].onclick=function(){
+		// 				// let row=this.parentElement.parentElement;
+		// 				obj.originalData.columns.forEach(column => {						
+		// 					switch (column.type){
+		// 						case 'text':
+		// 							let td=row.getElementsByClassName(column.className)[0].parentElement;
+		// 							let span=td.firstChild;
+		// 							span.attributes["value"].value=td.childNodes[1].value;		//Módosított érték visszaírása a spanba
+		// 							span.innerText=span.attributes["value"].value;
+		// 							td.removeChild(td.childNodes[1]);							//Input eltávolítása
+		// 							td.firstChild.style.display='inline';						//Span megjelenítése
+		// 							break;
+		// 					};
+		// 				});
+		// 				row.childNodes[0].firstChild.style.display='inline';			//Delete gomb megjelenítése
+		// 				row.childNodes[1].firstChild.style.display='inline';			//Edit gomb megjelenítése
+		// 				row.childNodes[0].removeChild(row.childNodes[0].childNodes[1]);	//OK gomb törlése
+		// 				row.childNodes[1].removeChild(row.childNodes[1].childNodes[1]);	//Mégsem gomb törlése
+		// 				obj.underEditing=false;
+		// 			};
+		// 			//Szerkeszt gomb elrejtése és az Mégsem gomb megjelenítése
+		// 			row.childNodes[1].firstChild.style.display='none';
+		// 			i			=document.createElement('i');
+		// 			i.className	='fas fa-ban';
+		// 			i.style		='color:red';
+		// 			row.childNodes[1].appendChild(i);
+		// 			//Esemény a Mégsem gombhoz
+		// 			row.childNodes[1].childNodes[1].onclick=function(){
+		// 				// let row=this.parentElement.parentElement;
+		// 				obj.originalData.columns.forEach(column => {						
+		// 					if (column.type!='id'){
+		// 						let td=row.getElementsByClassName(column.className)[0].parentElement;
+		// 						td.removeChild(td.childNodes[1]);							//Input eltávolítása
+		// 						td.firstChild.style.display='inline';						//Span megjelenítése
+		// 					};
+		// 				});
+		// 				row.childNodes[0].firstChild.style.display='inline';			//Delete gomb megjelenítése
+		// 				row.childNodes[1].firstChild.style.display='inline';			//Edit gomb megjelenítése
+		// 				row.childNodes[0].removeChild(row.childNodes[0].childNodes[1]);	//OK gomb törlése
+		// 				row.childNodes[1].removeChild(row.childNodes[1].childNodes[1]);	//Mégsem gomb törlése
+		// 				obj.underEditing=false;
+		// 			};
+		// 		};
+		// 	};
+		// 	tr.insertBefore(td,tr.childNodes[0]);
+		// };
+
 
 		// Új sor beszúrása az adott helyre
 		if (position==0) {
