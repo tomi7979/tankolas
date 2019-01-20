@@ -1,12 +1,10 @@
 
 <script src="/javascripts/functions/functions.js"></script>
-<script src="/javascripts/functions/classTable.js"></script>
+<script src="/javascripts/functions/_Table.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script>
 	var socket=io();
-	t=new _Table('tableReport');
-
-	socket.on('connect',()=>{
+		socket.on('connect',()=>{
 		console.log('Connected from ' + period);
 	});
 	socket.on('disconnect',()=>{
@@ -19,6 +17,7 @@
 			case 'daily':
 				var tableData={
 				name:'tableReport',
+				elementId:'tableReport',
 				data:data[0],
 				columns:[
 					{	head:   'Év',
@@ -57,6 +56,7 @@
 			case 'weekly':
 				var tableData={
 					name:'tableReport',
+					elementId:'tableReport',
 					data:data[0],
 					columns:[
 						{	head:   'Év',
@@ -90,6 +90,7 @@
 			case 'monthly':
 				var tableData={
 				name:'tableReport',
+				elementId:'tableReport',
 				data:data[0],
 				columns:[
 					{	head:   'Év',
@@ -122,6 +123,7 @@
 				};
 			break;
 		}
-		t.create(tableData);		
+		t=new _Table(tableData);
+		t.create(tableData);	
 	});
 </script>

@@ -1,16 +1,18 @@
 <script src="/javascripts/functions/functions.js"></script>
-<script src="/javascripts/functions/classTable.js"></script>
+<!-- <script src="/javascripts/functions/classTable.js"></script> -->
+<script src="/javascripts/functions/_Table.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
 	var socket=io();
-	t=new _Table('tableFueling');
+	// t=new _Table('tableFueling');
 	socket.emit('getFueling');
 	socket.on('resFueling',function(data){
 		console.log(data);
 		let tableData={
+			elementId:'tableFueling',
 			name:'tableFueling',
-			editable:true,
+			editRow:true,
 			deleteRow:true,
 			// rowEvents:{
 			// 	onclick:function(){console.log('rowEvent');}
@@ -52,9 +54,8 @@
 				}
 			]
 		};
+		t=new _Table(tableData);
 		t.create(tableData);
-		// t.addEmptyRow(1);
-		t.addRow({position:1,data:{}});
 	});
 
 	// document.getElementById("btnFuelingSave").onclick=function(){
@@ -74,5 +75,8 @@
 	};
 	document.getElementById('btn_getChanges').onclick=function(){
 		console.log(t.getChanges());
+	};
+	document.getElementById('btn_addRow').onclick=function(){
+		t.addEmptyRow();
 	};
 </script>
